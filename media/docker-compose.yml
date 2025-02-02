@@ -1,0 +1,154 @@
+name: 'media'
+
+services:
+  qbittorrent:
+    image: linuxserver/qbittorrent:latest
+    restart: unless-stopped
+    environment:
+      - TZ=America/Sao_Paulo
+      - WEBUI_PORT=8080
+      - PUID=1001
+      - PGID=1002
+    volumes:
+      - ../data/qbittorrent/config:/config
+      - ../data/Downloads/torrents:/downloads
+    ports:
+      - '8080:8080'
+      - '62609:62609'
+
+  jackett:
+    image: ghcr.io/linuxserver/jackett:latest
+    restart: unless-stopped
+    environment:
+      - TZ=America/Sao_Paulo
+      - PUID=1001
+      - PGID=1002
+      - ../data/jackett/config:/config
+    ports:
+      - '9117:9117'
+
+  bazarr:
+    image: ghcr.io/linuxserver/bazarr:latest
+    restart: unless-stopped
+    environment:
+      - TZ=America/Sao_Paulo
+      - PUID=1001
+      - PGID=1002
+    volumes:
+      - ../data/Videos/radarr:/movies
+      - ../data/Videos/sonarr:/tv
+      - ../data/bazarr/config:/config
+    ports:
+      - '6767:6767'
+
+  overseerr:
+    image: sctx/overseerr
+    restart: unless-stopped
+    depends_on:
+      - qbittorrent
+    environment:
+      - TZ=America/Sao_Paulo
+      - PORT=5055
+    volumes:
+      - ../data/overseerr/config:/app/config
+    ports:
+      - '5055:5055'
+
+  prowlarr:
+    image: ghcr.io/hotio/prowlarr:latest
+    restart: unless-stopped
+    depends_on:
+      - flaresolverr
+    environment:
+      - TZ=America/Sao_Paulo
+      - PUID=1001
+      - PGID=1002
+    volumes:
+      - ../data/prowlarr/config:/config
+    ports:
+      - '9696:9696'
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    restart: unless-stopped
+    volumes:
+      - ../data/flaresolverr/config:/config
+    ports:
+      - '8191:8191'
+
+  radarr:
+    image: ghcr.io/linuxserver/radarr:latest
+    restart: unless-stopped
+    depends_on:
+      - qbittorrent
+    environment:
+      - TZ=America/Sao_Paulo
+      - PUID=1001
+      - PGID=1002
+    volumes:
+      - ../data/radarr/config:/config
+      - ../data/Downloads/torrents:/downloads
+      - ../data/Videos/radarr/movies:/movies
+      - ../data/Videos/radarr/anime:/anime
+    ports:
+      - '7878:7878'
+
+  sonarr:
+    image: ghcr.io/linuxserver/sonarr:latest
+    restart: unless-stopped
+    depends_on:
+      - qbittorrent
+    environment:
+      - TZ=America/Sao_Paulo
+      - PUID=1001
+      - PGID=1002
+    volumes:
+      - ../data/sonarr/config:/config
+      - ../data/Videos/sonarr:/tv
+      - ../data/Downloads/torrents:/downloads
+    ports:
+      - '8989:8989'
+
+  torrent-indexer:
+    image: felipemarinho97/torrent-indexer:latest
+    container_name: torrent-indexer
+    restart: unless-stopped
+    ports:
+      - 7006:7006
+    environment:
+      - REDIS_HOST=redis
+      - MEILISEARCH_ADDRESS=http://meilisearch:7700
+      - MEILISEARCH_KEY=ASHIEUasa3Y78YH@^%JKLDDskn
+      - FLARESOLVERR_ADDRESS=http://flaresolverr:8191
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: unless-stopped
+
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    container_name: meilisearch
+    restart: unless-stopped
+    environment:
+      - MEILI_NO_ANALYTICS=true
+      - MEILI_MASTER_KEY=ASHIEUasa3Y78YH@^%JKLDDskn
+
+  plex:
+    image: plexinc/pms-docker:latest
+    restart: unless-stopped
+    environment:
+      - TZ=America/Sao_Paulo
+      - PUID=1001
+      - PGID=1002
+      - VA_DRIVER=IHD
+      - PLEX_HW_TRANS_MAX=16
+    volumes:
+      - ../data/plex/config:/config
+      - ../data/plex/data:/data
+      - ../data/plex/transcode:/transcode
+      - ../data/Videos:/media
+    devices:
+      - /dev/dri:/dev/dri
+      - /dev/bus/usb:/dev/bus/usb
+    network_mode: host
