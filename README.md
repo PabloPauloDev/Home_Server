@@ -40,7 +40,7 @@ Okay, now we have the search engines, media player, downloader but it's just too
 
 ![image](https://github.com/user-attachments/assets/1ca3c272-828e-41cb-aa82-1efd649de207)
 
-# Network Level Add-Blocker
+# Network Level Ad-Blocker
 
 ## Pihole
 
@@ -52,9 +52,9 @@ Pihole is a network level add blocker, its a bit simple, you just have to config
 
 Its just a simple .sh script that uses your cloudflare api to change the ip linked to your domain
 
-# Organizer
+# Organizr
 
-Organizer is a simple tool to organize all the links in one page, its simple to configure and depends on your own, so, try it!
+Organizr is a simple tool to organize all the links in one page, its simple to configure and depends on your own, so, try it!
 
 ![image](https://github.com/user-attachments/assets/40d3d2ed-2acb-449a-833b-c57cff53a385)
 
